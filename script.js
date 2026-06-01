@@ -1059,10 +1059,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ===== LOADING SCREEN =====
 function initLoadingScreen() {
-  setTimeout(() => {
-    document.getElementById("loading-screen").classList.add("hidden");
-    initializeAnimations();
-  }, 2000);
+    if (sessionStorage.getItem('algoInfinityVerse_appLoaded')) {
+        document.getElementById('loading-screen').style.display = 'none';
+        initializeAnimations();
+        return;
+    }
+    
+    setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+        initializeAnimations();
+        sessionStorage.setItem('algoInfinityVerse_appLoaded', 'true');
+    }, 2000);
 }
 
 // ===== NAVBAR =====
