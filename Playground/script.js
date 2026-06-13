@@ -49,8 +49,13 @@ function resetEditor() {
 
 function formatValue(value) {
     if (typeof value === "object" && value !== null) {
-        return JSON.stringify(value, null, 2);
+        try {
+            return JSON.stringify(value, null, 2);
+        } catch {
+            return "[Object]";
+        }
     }
+
     return String(value);
 }
 
@@ -122,29 +127,35 @@ function runJavaScript(code) {
     }
 }
 
-function runTypeScript(code) {
+async function runTypeScript(code) {
     clearOutput();
-    output.textContent = "Running...\n";
-    const capture = createConsoleCapture();
+    output.textContent = "Compiling and Running remotely via Judge0...";
 
     try {
-        if (typeof ts === "undefined") {
-            throw new Error("TypeScript compiler library failed to load.");
-        }
+        const response = await fetch(
+            "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    language_id: 74,
+                    source_code: code
+                })
+            }
+        );
 
-        const jsCode = ts.transpile(code);
-        const execute = new Function(jsCode);
-        const result = execute();
+        const result = await response.json();
 
-        if (result !== undefined) {
-            capture.logs.push(formatValue(result));
-        }
+        output.textContent =
+            result.stdout ||
+            result.stderr ||
+            result.compile_output ||
+            "✅ Code ran successfully with no terminal output.";
 
-        output.textContent = capture.logs.join("\n") || "✅ TypeScript executed successfully.";
-    } catch (error) {
-        output.textContent = `❌ ${error.name}: ${error.message}`;
-    } finally {
-        capture.restore();
+    } catch (err) {
+        output.textContent = `❌ Network Error: ${err.message}`;
     }
 }
 
