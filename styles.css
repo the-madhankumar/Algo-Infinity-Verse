@@ -5577,7 +5577,7 @@ body.light-mode {
 
 
 /*AUTH GATE MODAL*/
-`#authGateModal` {
+#authGateModal {
   z-index: 11000;
 }
 
